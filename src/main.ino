@@ -40,6 +40,8 @@ Adafruit_MQTT_Publish output = Adafruit_MQTT_Publish(&mqtt, MQTT_USERNAME "/feed
 
 int timestamp = 0;
 
+#define BUTTON_PIN 2
+
 /*************************** Sketch Code ************************************/
 
 void inputcallback(double x)
@@ -53,6 +55,8 @@ void setup()
 {
     Serial.begin(9600);
     delay(10);
+
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
 
     // updateStatus();
 
@@ -84,6 +88,21 @@ void loop()
     // connection and automatically reconnect when disconnected).  See the MQTT_connect
     // function definition further below.
     MQTT_connect();
+
+    // If the button is pressed
+    if (digitalRead(BUTTON_PIN) == LOW)
+    {
+        Serial.println("Button pressed");
+        // Wait for the button to be released
+        while (digitalRead(BUTTON_PIN) == LOW)
+        {
+            Serial.println("Button still pressed");
+            delay(100);
+        }
+        Serial.println("Button released");
+        // Publish a button pushed message to a topic
+        output.publish(123);
+    }
 
     // this is our 'wait for incoming subscription packets and callback em' busy subloop
     // try to spend your time here:
