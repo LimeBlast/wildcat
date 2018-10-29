@@ -154,8 +154,7 @@ void MQTT_connect()
         if (retries == 0)
         {
             // basically die and wait for WDT to reset me
-            while (1)
-                ;
+            while (1);
         }
     }
     Serial.println("MQTT Connected!");
