@@ -14,6 +14,7 @@
   Written by Tony DiCola for Adafruit Industries.
   MIT license, all text above must be included in any redistribution
  ****************************************************/
+#include <NTPClient.h>        //Used to get a timestamp
 #include <ESP8266WiFi.h>      //ESP8266 Core WiFi Library
 #include <DNSServer.h>        //Local DNS Server used for redirecting all requests to the configuration portal
 #include <ESP8266WebServer.h> //Local WebServer used to serve the configuration portal
@@ -36,11 +37,16 @@ Adafruit_MQTT_Client mqtt(&client, MQTT_SERVER, MQTT_SERVERPORT, MQTT_USERNAME, 
 Adafruit_MQTT_Subscribe input = Adafruit_MQTT_Subscribe(&mqtt, MQTT_USERNAME "/feeds/wildcat.incident");
 Adafruit_MQTT_Publish output = Adafruit_MQTT_Publish(&mqtt, MQTT_USERNAME "/feeds/wildcat.incident");
 
-/****************************** Values **************************************/
+/****************************** IO *****************************************/
 
 int timestamp = 0;
 
 #define BUTTON_PIN 2
+
+/****************************** Timestamp ***********************************/
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
 
 /*************************** Sketch Code ************************************/
 
@@ -78,6 +84,8 @@ void setup()
     input.setCallback(inputcallback);
 
     mqtt.subscribe(&input);
+
+    timeClient.begin();
 }
 
 uint32_t x = 0;
@@ -89,6 +97,10 @@ void loop()
     // function definition further below.
     MQTT_connect();
 
+    timeClient.update();
+    Serial.println(timeClient.getFormattedTime());
+    Serial.println(timeClient.getEpochTime());
+
     // If the button is pressed
     if (digitalRead(BUTTON_PIN) == LOW)
     {
@@ -96,7 +108,6 @@ void loop()
         // Wait for the button to be released
         while (digitalRead(BUTTON_PIN) == LOW)
         {
-            Serial.println("Button still pressed");
             delay(100);
         }
         Serial.println("Button released");
