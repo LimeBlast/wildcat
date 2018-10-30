@@ -19,9 +19,6 @@
 
 /************************ Example Starts Here *******************************/
 
-// this int will hold the current count for our sketch
-int count = 0;
-
 // Track time of last published messages and limit feed->save events to once
 // every IO_LOOP_DELAY milliseconds.
 //
@@ -36,7 +33,7 @@ int count = 0;
 unsigned long lastUpdate = 0;
 
 // To be updated with the latest value from the time/seconds feed
-char *timestamp = 0;
+long timestamp = 0;
 
 // set up the 'incident' feed
 AdafruitIO_Feed *incident = io.feed("wildcat.incident");
@@ -57,11 +54,12 @@ void setup()
     // connect to io.adafruit.com
     io.connect();
 
-    // set up a message handler for the count feed.
+    // set up a message handler for the incident feed.
     // the handleMessage function (defined below)
     // will be called whenever a message is
     // received from adafruit io.
     incident->onMessage(handleMessage);
+
     seconds->onMessage(handleSecs);
 
     // wait for a connection
@@ -89,13 +87,10 @@ void loop()
 
     if (millis() > (lastUpdate + IO_LOOP_DELAY))
     {
-        // save count to the 'incident' feed on Adafruit IO
+        // save timestamp to the 'incident' feed on Adafruit IO
         Serial.print("sending -> ");
-        Serial.println(count);
-        incident->save(count);
-
-        // increment the count by 1
-        count++;
+        Serial.println(timestamp);
+        incident->save(timestamp);
 
         // after publishing, store the current time
         lastUpdate = millis();
@@ -116,5 +111,7 @@ void handleSecs(char *data, uint16_t len)
 {
     Serial.print("Seconds Feed: ");
     Serial.println(data);
-    timestamp = data;
+    timestamp = atol(data);
+    Serial.print("Timestamp: ");
+    Serial.println(timestamp);
 }
