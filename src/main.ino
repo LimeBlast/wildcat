@@ -30,10 +30,20 @@
 // milliseconds and avoid publishing until IO_LOOP_DELAY milliseconds have
 // passed.
 #define IO_LOOP_DELAY 5000
+
+#define ONE_MINUTE 60
+#define ONE_HOUR (ONE_MINUTE * 60)
+#define ONE_DAY (ONE_HOUR * 24)
+
 unsigned long lastUpdate = 0;
 
 // To be updated with the latest value from the time/seconds feed
 long timestamp = 0;
+long lastIncident = 0;
+long secondsDifference = 0;
+long minutesDifference = 0;
+long hoursDifference = 0;
+long daysDifference = 0;
 
 // set up the 'incident' feed
 AdafruitIO_Feed *incident = io.feed("wildcat.incident");
@@ -47,9 +57,9 @@ void setup()
     Serial.begin(9600);
 
     // wait for serial monitor to open
-    while (!Serial);
+    while (!Serial)
 
-    Serial.print("Connecting to Adafruit IO");
+        Serial.print("Connecting to Adafruit IO");
 
     // connect to io.adafruit.com
     io.connect();
@@ -87,10 +97,58 @@ void loop()
 
     if (millis() > (lastUpdate + IO_LOOP_DELAY))
     {
-        // save timestamp to the 'incident' feed on Adafruit IO
-        Serial.print("sending -> ");
-        Serial.println(timestamp);
-        incident->save(timestamp);
+        // // save timestamp to the 'incident' feed on Adafruit IO
+        // Serial.print("sending -> ");
+        // Serial.println(timestamp);
+        // incident->save(timestamp);
+
+        secondsDifference = timestamp - lastIncident;
+
+        Serial.print("Time since last incident: ");
+
+        if (secondsDifference < ONE_MINUTE)
+        {
+            Serial.print(secondsDifference);
+            Serial.print(" second");
+            if (secondsDifference > 1)
+            {
+                Serial.print("s");
+            }
+            Serial.println(".");
+        }
+        else if (secondsDifference < ONE_HOUR)
+        {
+            minutesDifference = secondsDifference / ONE_MINUTE;
+            Serial.print(minutesDifference);
+            Serial.print(" minute");
+            if (minutesDifference > 1)
+            {
+                Serial.print("s");
+            }
+            Serial.println(".");
+        }
+        else if (secondsDifference < ONE_DAY)
+        {
+            hoursDifference = secondsDifference / ONE_HOUR;
+            Serial.print(hoursDifference);
+            Serial.print(" hour");
+            if (hoursDifference > 1)
+            {
+                Serial.print("s");
+            }
+            Serial.println(".");
+        }
+        else
+        {
+            daysDifference = secondsDifference / ONE_DAY;
+            Serial.print(daysDifference);
+            Serial.println(" day");
+            if (daysDifference > 1)
+            {
+                Serial.print("s");
+            }
+            Serial.println(".");
+        }
 
         // after publishing, store the current time
         lastUpdate = millis();
@@ -102,6 +160,7 @@ void loop()
 // the incident feed in the setup() function above.
 void handleMessage(AdafruitIO_Data *data)
 {
+    lastIncident = data->toLong();
     Serial.print("received <- ");
     Serial.println(data->value());
 }
@@ -109,9 +168,9 @@ void handleMessage(AdafruitIO_Data *data)
 // message handler for the seconds feed
 void handleSecs(char *data, uint16_t len)
 {
-    Serial.print("Seconds Feed: ");
-    Serial.println(data);
     timestamp = atol(data);
-    Serial.print("Timestamp: ");
-    Serial.println(timestamp);
+    // Serial.print("Seconds Feed: ");
+    // Serial.println(data);
+    // Serial.print("Timestamp: ");
+    // Serial.println(timestamp);
 }
