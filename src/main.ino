@@ -35,8 +35,14 @@ int count = 0;
 #define IO_LOOP_DELAY 5000
 unsigned long lastUpdate = 0;
 
+// To be updated with the latest value from the time/seconds feed
+char* timestamp = 0;
+
 // set up the 'counter' feed
 AdafruitIO_Feed *counter = io.feed("counter");
+
+// set up the 'seconds' feed
+AdafruitIO_Time *seconds = io.time(AIO_TIME_SECONDS);
 
 void setup()
 {
@@ -56,6 +62,7 @@ void setup()
     // will be called whenever a message is
     // received from adafruit io.
     counter->onMessage(handleMessage);
+    seconds->onMessage(handleSecs);
 
     // wait for a connection
     while (io.status() < AIO_CONNECTED)
@@ -102,4 +109,12 @@ void handleMessage(AdafruitIO_Data *data)
 {
     Serial.print("received <- ");
     Serial.println(data->value());
+}
+
+// message handler for the seconds feed
+void handleSecs(char *data, uint16_t len)
+{
+    Serial.print("Seconds Feed: ");
+    Serial.println(data);
+    timestamp = data;
 }
