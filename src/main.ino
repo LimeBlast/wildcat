@@ -30,20 +30,16 @@
 // milliseconds and avoid publishing until IO_LOOP_DELAY milliseconds have
 // passed.
 #define IO_LOOP_DELAY 5000
+unsigned long lastUpdate = 0;
 
+// Define some standard durations
 #define ONE_MINUTE 60
 #define ONE_HOUR (ONE_MINUTE * 60)
 #define ONE_DAY (ONE_HOUR * 24)
 
-unsigned long lastUpdate = 0;
-
 // To be updated with the latest value from the time/seconds feed
 long timestamp = 0;
 long lastIncident = 0;
-long secondsDifference = 0;
-long minutesDifference = 0;
-long hoursDifference = 0;
-long daysDifference = 0;
 
 // set up the 'incident' feed
 AdafruitIO_Feed *incident = io.feed("wildcat.incident");
@@ -102,33 +98,7 @@ void loop()
         // Serial.println(timestamp);
         // incident->save(timestamp);
 
-        secondsDifference = timestamp - lastIncident;
-
-        Serial.print("Time since last incident: ");
-
-        if (secondsDifference < ONE_MINUTE)
-        {
-            Serial.print(secondsDifference);
-            Serial.println(plural(" second", secondsDifference));
-        }
-        else if (secondsDifference < ONE_HOUR)
-        {
-            minutesDifference = secondsDifference / ONE_MINUTE;
-            Serial.print(minutesDifference);
-            Serial.println(plural(" minute", minutesDifference));
-        }
-        else if (secondsDifference < ONE_DAY)
-        {
-            hoursDifference = secondsDifference / ONE_HOUR;
-            Serial.print(hoursDifference);
-            Serial.println(plural(" hour", hoursDifference));
-        }
-        else
-        {
-            daysDifference = secondsDifference / ONE_DAY;
-            Serial.print(daysDifference);
-            Serial.println(plural(" day", daysDifference));
-        }
+        updateDisplay();
 
         // after publishing, store the current time
         lastUpdate = millis();
@@ -162,4 +132,40 @@ String plural(String string, long value)
         string = string + "s";
     }
     return string;
+}
+
+void updateDisplay()
+{
+    long secondsDifference = 0;
+    long minutesDifference = 0;
+    long hoursDifference = 0;
+    long daysDifference = 0;
+
+    secondsDifference = timestamp - lastIncident;
+
+    Serial.print("Time since last incident: ");
+
+    if (secondsDifference < ONE_MINUTE)
+    {
+        Serial.print(secondsDifference);
+        Serial.println(plural(" second", secondsDifference));
+    }
+    else if (secondsDifference < ONE_HOUR)
+    {
+        minutesDifference = secondsDifference / ONE_MINUTE;
+        Serial.print(minutesDifference);
+        Serial.println(plural(" minute", minutesDifference));
+    }
+    else if (secondsDifference < ONE_DAY)
+    {
+        hoursDifference = secondsDifference / ONE_HOUR;
+        Serial.print(hoursDifference);
+        Serial.println(plural(" hour", hoursDifference));
+    }
+    else
+    {
+        daysDifference = secondsDifference / ONE_DAY;
+        Serial.print(daysDifference);
+        Serial.println(plural(" day", daysDifference));
+    }
 }
