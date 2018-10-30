@@ -41,10 +41,8 @@ unsigned long lastUpdate = 0;
 long timestamp = 0;
 long lastIncident = 0;
 
-// set up the 'incident' feed
+// Subscribe to feeds
 AdafruitIO_Feed *incident = io.feed("wildcat.incident");
-
-// set up the 'seconds' feed
 AdafruitIO_Time *seconds = io.time(AIO_TIME_SECONDS);
 
 void setup()
@@ -55,17 +53,13 @@ void setup()
     // wait for serial monitor to open
     while (!Serial)
 
-        Serial.print("Connecting to Adafruit IO");
+    Serial.print("Connecting to Adafruit IO");
 
     // connect to io.adafruit.com
     io.connect();
 
-    // set up a message handler for the incident feed.
-    // the handleMessage function (defined below)
-    // will be called whenever a message is
-    // received from adafruit io.
+    // set up handlers for the feeds
     incident->onMessage(handleMessage);
-
     seconds->onMessage(updateTimestamp);
 
     // wait for a connection
@@ -79,7 +73,7 @@ void setup()
     Serial.println();
     Serial.println(io.statusText());
 
-    // get last value
+    // get last value from the incident
     incident->get();
 }
 
