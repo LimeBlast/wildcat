@@ -36,10 +36,10 @@ int count = 0;
 unsigned long lastUpdate = 0;
 
 // To be updated with the latest value from the time/seconds feed
-char* timestamp = 0;
+char *timestamp = 0;
 
-// set up the 'counter' feed
-AdafruitIO_Feed *counter = io.feed("counter");
+// set up the 'incident' feed
+AdafruitIO_Feed *incident = io.feed("wildcat.incident");
 
 // set up the 'seconds' feed
 AdafruitIO_Time *seconds = io.time(AIO_TIME_SECONDS);
@@ -61,7 +61,7 @@ void setup()
     // the handleMessage function (defined below)
     // will be called whenever a message is
     // received from adafruit io.
-    counter->onMessage(handleMessage);
+    incident->onMessage(handleMessage);
     seconds->onMessage(handleSecs);
 
     // wait for a connection
@@ -76,7 +76,7 @@ void setup()
     Serial.println(io.statusText());
 
     // get last value
-    counter->get();
+    incident->get();
 }
 
 void loop()
@@ -89,10 +89,10 @@ void loop()
 
     if (millis() > (lastUpdate + IO_LOOP_DELAY))
     {
-        // save count to the 'counter' feed on Adafruit IO
+        // save count to the 'incident' feed on Adafruit IO
         Serial.print("sending -> ");
         Serial.println(count);
-        counter->save(count);
+        incident->save(count);
 
         // increment the count by 1
         count++;
@@ -102,9 +102,9 @@ void loop()
     }
 }
 
-// this function is called whenever a 'counter' message
+// this function is called whenever a 'incident' message
 // is received from Adafruit IO. it was attached to
-// the counter feed in the setup() function above.
+// the incident feed in the setup() function above.
 void handleMessage(AdafruitIO_Data *data)
 {
     Serial.print("received <- ");
