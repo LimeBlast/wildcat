@@ -109,45 +109,25 @@ void loop()
         if (secondsDifference < ONE_MINUTE)
         {
             Serial.print(secondsDifference);
-            Serial.print(" second");
-            if (secondsDifference > 1)
-            {
-                Serial.print("s");
-            }
-            Serial.println(".");
+            Serial.println(plural(" second", secondsDifference));
         }
         else if (secondsDifference < ONE_HOUR)
         {
             minutesDifference = secondsDifference / ONE_MINUTE;
             Serial.print(minutesDifference);
-            Serial.print(" minute");
-            if (minutesDifference > 1)
-            {
-                Serial.print("s");
-            }
-            Serial.println(".");
+            Serial.println(plural(" minute", minutesDifference));
         }
         else if (secondsDifference < ONE_DAY)
         {
             hoursDifference = secondsDifference / ONE_HOUR;
             Serial.print(hoursDifference);
-            Serial.print(" hour");
-            if (hoursDifference > 1)
-            {
-                Serial.print("s");
-            }
-            Serial.println(".");
+            Serial.println(plural(" hour", hoursDifference));
         }
         else
         {
             daysDifference = secondsDifference / ONE_DAY;
             Serial.print(daysDifference);
-            Serial.println(" day");
-            if (daysDifference > 1)
-            {
-                Serial.print("s");
-            }
-            Serial.println(".");
+            Serial.println(plural(" day", daysDifference));
         }
 
         // after publishing, store the current time
@@ -173,4 +153,13 @@ void handleSecs(char *data, uint16_t len)
     // Serial.println(data);
     // Serial.print("Timestamp: ");
     // Serial.println(timestamp);
+}
+
+String plural(String string, long value)
+{
+    if (value < 1 || value > 1)
+    {
+        string = string + "s";
+    }
+    return string;
 }
