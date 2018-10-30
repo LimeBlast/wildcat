@@ -70,7 +70,7 @@ void setup()
     // received from adafruit io.
     incident->onMessage(handleMessage);
 
-    seconds->onMessage(handleSecs);
+    seconds->onMessage(updateTimestamp);
 
     // wait for a connection
     while (io.status() < AIO_CONNECTED)
@@ -146,7 +146,7 @@ void handleMessage(AdafruitIO_Data *data)
 }
 
 // message handler for the seconds feed
-void handleSecs(char *data, uint16_t len)
+void updateTimestamp(char *data, uint16_t len)
 {
     timestamp = atol(data);
     // Serial.print("Seconds Feed: ");
