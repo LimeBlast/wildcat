@@ -10,12 +10,19 @@
 //
 // All text above must be included in any redistribution.
 
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include "Adafruit_LEDBackpack.h"
+
 /************************** Configuration ***********************************/
 
 // edit the config.h tab and enter your Adafruit IO credentials
 // and any additional configuration needed for WiFi, cellular,
 // or ethernet clients.
 #include "config.h"
+
+/************************ LED Matrix *******************************/
+Adafruit_8x16minimatrix matrix = Adafruit_8x16minimatrix();
 
 /************************ Example Starts Here *******************************/
 
@@ -29,7 +36,7 @@
 // Instead, we can use the millis() function to get the current time in
 // milliseconds and avoid publishing until IO_LOOP_DELAY milliseconds have
 // passed.
-#define IO_LOOP_DELAY 5000
+#define IO_LOOP_DELAY 10000
 unsigned long lastUpdate = 0;
 
 // Define some standard durations
@@ -40,6 +47,7 @@ unsigned long lastUpdate = 0;
 // To be updated with the latest value from the time/seconds feed
 long timestamp = 0;
 long lastIncident = 0;
+String displayText = "";
 
 // Subscribe to feeds
 AdafruitIO_Feed *incident = io.feed("wildcat.incident");
@@ -52,8 +60,10 @@ void setup()
 
     // wait for serial monitor to open
     while (!Serial)
+    {
+    }
 
-        Serial.print("Connecting to Adafruit IO");
+    Serial.print("Connecting to Adafruit IO");
 
     // connect to io.adafruit.com
     io.connect();
@@ -72,6 +82,13 @@ void setup()
     // we are connected
     Serial.println();
     Serial.println(io.statusText());
+
+    // Begin the matrix
+    matrix.begin(0x70);
+    matrix.setTextSize(1);
+    matrix.setTextWrap(false);
+    matrix.setTextColor(LED_ON);
+    matrix.setRotation(1);
 
     // get last value from the incident
     incident->get();
@@ -142,30 +159,36 @@ void calculateDifference()
 
     if (secondsDifference < ONE_MINUTE)
     {
-        Serial.print(secondsDifference);
-        Serial.println(plural(" second", secondsDifference));
+        displayText = secondsDifference + plural(" second", secondsDifference);
     }
     else if (secondsDifference < ONE_HOUR)
     {
         minutesDifference = secondsDifference / ONE_MINUTE;
-        Serial.print(minutesDifference);
-        Serial.println(plural(" minute", minutesDifference));
+        displayText = minutesDifference + plural(" minute", minutesDifference);
     }
     else if (secondsDifference < ONE_DAY)
     {
         hoursDifference = secondsDifference / ONE_HOUR;
-        Serial.print(hoursDifference);
-        Serial.println(plural(" hour", hoursDifference));
+        displayText = hoursDifference + plural(" hour", hoursDifference);
     }
     else
     {
         daysDifference = secondsDifference / ONE_DAY;
-        Serial.print(daysDifference);
-        Serial.println(plural(" day", daysDifference));
+        displayText = daysDifference + plural(" day", daysDifference);
     }
+
+    Serial.println(displayText);
 }
 
 void updateDisplay()
 {
-    
+    for (int8_t x = 16; x >= -36; x--)
+    {
+        matrix.clear();
+        matrix.setCursor(x, 0);
+        matrix.print("World");
+        // matrix.print(displayText);
+        matrix.writeDisplay();
+        delay(100);
+    }
 }
