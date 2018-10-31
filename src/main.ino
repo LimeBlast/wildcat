@@ -53,7 +53,7 @@ void setup()
     // wait for serial monitor to open
     while (!Serial)
 
-    Serial.print("Connecting to Adafruit IO");
+        Serial.print("Connecting to Adafruit IO");
 
     // connect to io.adafruit.com
     io.connect();
@@ -92,6 +92,7 @@ void loop()
         // Serial.println(timestamp);
         // incident->save(timestamp);
 
+        calculateDifference();
         updateDisplay();
 
         // after publishing, store the current time
@@ -128,7 +129,7 @@ String plural(String string, long value)
     return string;
 }
 
-void updateDisplay()
+void calculateDifference()
 {
     long secondsDifference = 0;
     long minutesDifference = 0;
@@ -162,4 +163,9 @@ void updateDisplay()
         Serial.print(daysDifference);
         Serial.println(plural(" day", daysDifference));
     }
+}
+
+void updateDisplay()
+{
+    
 }
