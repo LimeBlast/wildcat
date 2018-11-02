@@ -44,6 +44,9 @@ unsigned long lastUpdate = 0;
 #define ONE_HOUR (ONE_MINUTE * 60)
 #define ONE_DAY (ONE_HOUR * 24)
 
+// And the button input pin
+#define BUTTON_PIN 2
+
 // To be updated with the latest value from the time/seconds feed
 long timestamp = 0;
 long lastIncident = 0;
@@ -62,6 +65,8 @@ void setup()
     while (!Serial)
     {
     }
+
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
 
     Serial.print("Connecting to Adafruit IO");
 
@@ -102,13 +107,24 @@ void loop()
     // io.adafruit.com, and processes any incoming data.
     io.run();
 
+    // If the button is pressed
+    if (digitalRead(BUTTON_PIN) == LOW)
+    {
+        Serial.println("Button pressed");
+        // Wait for the button to be released
+        while (digitalRead(BUTTON_PIN) == LOW)
+        {
+            delay(100);
+        }
+        Serial.println("Button released");
+        // save timestamp to the 'incident' feed on Adafruit IO
+        Serial.print("sending -> ");
+        Serial.println(timestamp);
+        incident->save(timestamp);
+    }
+
     if (millis() > (lastUpdate + IO_LOOP_DELAY))
     {
-        // // save timestamp to the 'incident' feed on Adafruit IO
-        // Serial.print("sending -> ");
-        // Serial.println(timestamp);
-        // incident->save(timestamp);
-
         calculateDifference();
         updateDisplay();
 
@@ -182,12 +198,11 @@ void calculateDifference()
 
 void updateDisplay()
 {
-    for (int8_t x = 16; x >= -36; x--)
+    for (int8_t x = 16; x >= -60; x--)
     {
         matrix.clear();
         matrix.setCursor(x, 0);
-        matrix.print("World");
-        // matrix.print(displayText);
+        matrix.print(displayText);
         matrix.writeDisplay();
         delay(100);
     }
