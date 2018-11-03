@@ -25,21 +25,6 @@
 /************************ LED Matrix *******************************/
 Adafruit_8x16minimatrix matrix = Adafruit_8x16minimatrix();
 
-/************************ Example Starts Here *******************************/
-
-// Track time of last published messages and limit feed->save events to once
-// every IO_LOOP_DELAY milliseconds.
-//
-// Because this sketch is publishing AND subscribing, we can't use a long
-// delay() function call in the main loop since that would prevent io.run()
-// from being called often enough to receive all incoming messages.
-//
-// Instead, we can use the millis() function to get the current time in
-// milliseconds and avoid publishing until IO_LOOP_DELAY milliseconds have
-// passed.
-#define IO_LOOP_DELAY 10000
-unsigned long lastUpdate = 0;
-
 // Define some standard durations
 #define ONE_MINUTE 60
 #define ONE_HOUR (ONE_MINUTE * 60)
@@ -107,21 +92,26 @@ void loop()
     // io.adafruit.com, and processes any incoming data.
     io.run();
 
-    if (button.getSingleDebouncedRelease())
-    {
-        // save timestamp to the 'incident' feed on Adafruit IO
-        Serial.print("sending -> ");
-        Serial.println(timestamp);
-        incident->save(timestamp);
-    }
+    calculateDifference();
 
-    if (millis() > (lastUpdate + IO_LOOP_DELAY))
+    for (int8_t x = 16; x >= -60; x--)
     {
-        calculateDifference();
-        updateDisplay();
+        if (button.getSingleDebouncedPress())
+        {
+            // save timestamp to the 'incident' feed on Adafruit IO
+            Serial.print("sending -> ");
+            Serial.println(timestamp);
+            incident->save(timestamp);
+            lastIncident = timestamp;
+            calculateDifference();
+            x = 16; // resets the display loop
+        }
 
-        // after publishing, store the current time
-        lastUpdate = millis();
+        matrix.clear();
+        matrix.setCursor(x, 0);
+        matrix.print(displayText);
+        matrix.writeDisplay();
+        delay(100);
     }
 }
 
@@ -186,16 +176,4 @@ void calculateDifference()
     }
 
     Serial.println(displayText);
-}
-
-void updateDisplay()
-{
-    for (int8_t x = 16; x >= -60; x--)
-    {
-        matrix.clear();
-        matrix.setCursor(x, 0);
-        matrix.print(displayText);
-        matrix.writeDisplay();
-        delay(100);
-    }
 }
