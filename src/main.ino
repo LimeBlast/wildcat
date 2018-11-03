@@ -13,6 +13,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include "Adafruit_LEDBackpack.h"
+#include <Pushbutton.h>
 
 /************************** Configuration ***********************************/
 
@@ -46,6 +47,7 @@ unsigned long lastUpdate = 0;
 
 // And the button input pin
 #define BUTTON_PIN 2
+Pushbutton button(BUTTON_PIN);
 
 // To be updated with the latest value from the time/seconds feed
 long timestamp = 0;
@@ -65,8 +67,6 @@ void setup()
     while (!Serial)
     {
     }
-
-    pinMode(BUTTON_PIN, INPUT_PULLUP);
 
     Serial.print("Connecting to Adafruit IO");
 
@@ -107,16 +107,8 @@ void loop()
     // io.adafruit.com, and processes any incoming data.
     io.run();
 
-    // If the button is pressed
-    if (digitalRead(BUTTON_PIN) == LOW)
+    if (button.getSingleDebouncedRelease())
     {
-        Serial.println("Button pressed");
-        // Wait for the button to be released
-        while (digitalRead(BUTTON_PIN) == LOW)
-        {
-            delay(100);
-        }
-        Serial.println("Button released");
         // save timestamp to the 'incident' feed on Adafruit IO
         Serial.print("sending -> ");
         Serial.println(timestamp);
