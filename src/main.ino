@@ -92,18 +92,15 @@ void loop()
     // io.adafruit.com, and processes any incoming data.
     io.run();
 
-    calculateDifference();
+    setDisplayText();
 
     for (int8_t x = 16; x >= -60; x--)
     {
         if (button.getSingleDebouncedPress())
         {
-            // save timestamp to the 'incident' feed on Adafruit IO
-            Serial.print("sending -> ");
-            Serial.println(timestamp);
-            incident->save(timestamp);
+            reportIncident();
             lastIncident = timestamp;
-            calculateDifference();
+            setDisplayText();
             x = 16; // resets the display loop
         }
 
@@ -135,6 +132,14 @@ void updateTimestamp(char *data, uint16_t len)
     // Serial.println(timestamp);
 }
 
+void reportIncident()
+{
+    // save timestamp to the 'incident' feed on Adafruit IO
+    Serial.print("sending -> ");
+    Serial.println(timestamp);
+    incident->save(timestamp);
+}
+
 String plural(String string, long value)
 {
     if (value < 1 || value > 1)
@@ -144,7 +149,7 @@ String plural(String string, long value)
     return string;
 }
 
-void calculateDifference()
+void setDisplayText()
 {
     long secondsDifference = 0;
     long minutesDifference = 0;
