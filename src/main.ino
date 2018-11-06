@@ -1,61 +1,34 @@
-// Adafruit IO Publish & Subscribe Example
-//
-// Adafruit invests time and resources providing this open source code.
-// Please support Adafruit and open source hardware by purchasing
-// products from Adafruit!
-//
-// Written by Todd Treece for Adafruit Industries
-// Copyright (c) 2016 Adafruit Industries
-// Licensed under the MIT license.
-//
-// All text above must be included in any redistribution.
+/************************** Configuration ***********************************/
+#include "config.h"
 
+/************************** Libraries ***********************************/
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include "Adafruit_LEDBackpack.h"
 #include <Pushbutton.h>
+#include "AdafruitIO_WiFi.h"
 
-/************************** Configuration ***********************************/
+/************************** Serial ***********************************/
+int baud = 9600;
+void setupSerial()
+{
+    Serial.begin(baud); // start the serial connection
+    while (!Serial)
+    {
+        // wait for serial monitor to open
+    }
+}
 
-// edit the config.h tab and enter your Adafruit IO credentials
-// and any additional configuration needed for WiFi, cellular,
-// or ethernet clients.
-#include "config.h"
-
-/************************ LED Matrix *******************************/
-Adafruit_8x16minimatrix matrix = Adafruit_8x16minimatrix();
-
-// Define some standard durations
-#define ONE_MINUTE 60
-#define ONE_HOUR (ONE_MINUTE * 60)
-#define ONE_DAY (ONE_HOUR * 24)
-
-// And the button input pin
-#define BUTTON_PIN 2
-Pushbutton button(BUTTON_PIN);
-
-// To be updated with the latest value from the time/seconds feed
-long timestamp = 0;
-long lastIncident = 0;
-String displayText = "";
+/************************** Adafruit IO ***********************************/
+AdafruitIO_WiFi io(IO_USERNAME, IO_KEY, WIFI_SSID, WIFI_PASS);
 
 // Subscribe to feeds
 AdafruitIO_Feed *incident = io.feed("wildcat.incident");
 AdafruitIO_Time *seconds = io.time(AIO_TIME_SECONDS);
 
-void setup()
+void setupAdafruitIo()
 {
-    // start the serial connection
-    Serial.begin(9600);
-
-    // wait for serial monitor to open
-    while (!Serial)
-    {
-    }
-
     Serial.print("Connecting to Adafruit IO");
-
-    // connect to io.adafruit.com
     io.connect();
 
     // set up handlers for the feeds
@@ -73,17 +46,47 @@ void setup()
     Serial.println();
     Serial.println(io.statusText());
 
+    // get last value from the incident
+    incident->get();
+}
+
+/************************ LED Matrix *******************************/
+Adafruit_8x16minimatrix matrix = Adafruit_8x16minimatrix();
+
+void setupMatrix()
+{
     // Begin the matrix
     matrix.begin(0x70);
     matrix.setTextSize(1);
     matrix.setTextWrap(false);
     matrix.setTextColor(LED_ON);
     matrix.setRotation(1);
-
-    // get last value from the incident
-    incident->get();
 }
 
+/************************ Pushbutton *******************************/
+#define BUTTON_PIN 2
+Pushbutton button(BUTTON_PIN);
+
+/************************ Time calculations *******************************/
+// Define some standard durations
+#define ONE_MINUTE 60
+#define ONE_HOUR (ONE_MINUTE * 60)
+#define ONE_DAY (ONE_HOUR * 24)
+
+// To be updated with the latest value from the time/seconds feed
+long timestamp = 0;
+long lastIncident = 0;
+String displayText = "";
+
+/************************ Setup *******************************/
+void setup()
+{
+    setupSerial();
+    setupAdafruitIo();
+    setupMatrix();
+}
+
+/************************ Loop *******************************/
 void loop()
 {
     // io.run(); is required for all sketches.
@@ -104,7 +107,6 @@ void loop()
             x = 16; // resets the display loop
         }
 
-        Serial.println(x);
         matrix.clear();
         matrix.setCursor(x, 0);
         matrix.print(displayText);
@@ -183,7 +185,8 @@ void setDisplayText()
     Serial.println(displayText);
 }
 
-int getEndOfBuffer() {
+int getEndOfBuffer()
+{
     int16_t x1, y1;
     uint16_t w, h;
     matrix.getTextBounds(displayText, 0, 0, &x1, &y1, &w, &h);
