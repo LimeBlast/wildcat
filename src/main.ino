@@ -32,7 +32,7 @@ void setupAdafruitIo()
     io.connect();
 
     // set up handlers for the feeds
-    incident->onMessage(handleMessage);
+    incident->onMessage(handleIncident);
     seconds->onMessage(updateTimestamp);
 
     // wait for a connection
@@ -97,12 +97,11 @@ void loop()
 
     setDisplayText();
 
-    for (int8_t x = 16; x >= getEndOfBuffer(); x--)
+    for (int8_t x = 16; x >= getScrollWidth(); x--)
     {
         if (button.getSingleDebouncedPress())
         {
             reportIncident();
-            lastIncident = timestamp;
             setDisplayText();
             x = 16; // resets the display loop
         }
@@ -115,34 +114,45 @@ void loop()
     }
 }
 
-// this function is called whenever a 'incident' message
-// is received from Adafruit IO. it was attached to
-// the incident feed in the setup() function above.
-void handleMessage(AdafruitIO_Data *data)
+/**
+ * Updates `lastIncident` variable from the Adafruit IO incident feed
+ */
+void handleIncident(AdafruitIO_Data *data)
 {
     lastIncident = data->toLong();
     Serial.print("received <- ");
     Serial.println(data->value());
 }
 
-// message handler for the seconds feed
+/**
+ * Updates `timestamp` variable from the Adafruit IO seconds feed
+ */
 void updateTimestamp(char *data, uint16_t len)
 {
     timestamp = atol(data);
-    // Serial.print("Seconds Feed: ");
-    // Serial.println(data);
     // Serial.print("Timestamp: ");
     // Serial.println(timestamp);
 }
 
+/**
+ * Sends `timestamp` variable to the Adafruit IO incident feed
+ */
 void reportIncident()
 {
-    // save timestamp to the 'incident' feed on Adafruit IO
+    lastIncident = timestamp;
+    incident->save(lastIncident);
     Serial.print("sending -> ");
     Serial.println(timestamp);
-    incident->save(timestamp);
 }
 
+/**
+ * Returns the pluralisation of a string
+ * 
+ * @param string The string to pluralise
+ * @param value The value against which to calculate the pluralisation
+ * 
+ * @return The pluralised string
+ */
 String plural(String string, long value)
 {
     if (value < 1 || value > 1)
@@ -152,6 +162,11 @@ String plural(String string, long value)
     return string;
 }
 
+/**
+ * Sets the text to display on the LED matrix
+ * 
+ * Updates the `displayText` variable accordingly
+ */
 void setDisplayText()
 {
     long secondsDifference = 0;
@@ -185,7 +200,12 @@ void setDisplayText()
     Serial.println(displayText);
 }
 
-int getEndOfBuffer()
+/**
+ * Calculates number of pixels required to scroll current `displayText` message
+ * 
+ * @return Number of pixels
+ */
+int getScrollWidth()
 {
     int16_t x1, y1;
     uint16_t w, h;
