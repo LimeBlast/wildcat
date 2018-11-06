@@ -176,7 +176,11 @@ void setDisplayText()
 
     secondsDifference = timestamp - lastIncident;
 
-    if (secondsDifference < ONE_MINUTE)
+    if (secondsDifference == 0)
+    {
+        displayText = "Calculating...";
+    }
+    else if (secondsDifference < ONE_MINUTE)
     {
         displayText = secondsDifference + plural(" second", secondsDifference);
     }
