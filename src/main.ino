@@ -110,7 +110,7 @@ void loop()
         matrix.setCursor(x, 0);
         matrix.print(displayText);
         matrix.writeDisplay();
-        delay(100);
+        delay(80);
     }
 }
 
