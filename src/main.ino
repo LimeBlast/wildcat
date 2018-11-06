@@ -94,7 +94,7 @@ void loop()
 
     setDisplayText();
 
-    for (int8_t x = 16; x >= -60; x--)
+    for (int8_t x = 16; x >= getEndOfBuffer(); x--)
     {
         if (button.getSingleDebouncedPress())
         {
@@ -104,6 +104,7 @@ void loop()
             x = 16; // resets the display loop
         }
 
+        Serial.println(x);
         matrix.clear();
         matrix.setCursor(x, 0);
         matrix.print(displayText);
@@ -158,8 +159,6 @@ void setDisplayText()
 
     secondsDifference = timestamp - lastIncident;
 
-    Serial.print("Time since last incident: ");
-
     if (secondsDifference < ONE_MINUTE)
     {
         displayText = secondsDifference + plural(" second", secondsDifference);
@@ -180,5 +179,13 @@ void setDisplayText()
         displayText = daysDifference + plural(" day", daysDifference);
     }
 
+    Serial.print("Time since last incident: ");
     Serial.println(displayText);
+}
+
+int getEndOfBuffer() {
+    int16_t x1, y1;
+    uint16_t w, h;
+    matrix.getTextBounds(displayText, 0, 0, &x1, &y1, &w, &h);
+    return w - w - w;
 }
