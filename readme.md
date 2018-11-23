@@ -2,6 +2,10 @@
 
 For more information about this project, visit [https://maker.limeblast.co.uk/tag/wildcat/](https://maker.limeblast.co.uk/tag/wildcat/)
 
+## To do
+
+- Use [fauxmoESP](https://bitbucket.org/xoseperez/fauxmoesp) to add device to local smart network, allowing control directly via Alexa.
+
 ## Resources
 
 This is more for future reference than anything else.
