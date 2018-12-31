@@ -170,6 +170,7 @@ String plural(String string, long value)
 void setDisplayText()
 {
     long secondsDifference = 0;
+    long secondsRemainder = 0;
     long minutesDifference = 0;
     long hoursDifference = 0;
     long daysDifference = 0;
@@ -187,12 +188,17 @@ void setDisplayText()
     else if (secondsDifference < ONE_HOUR)
     {
         minutesDifference = secondsDifference / ONE_MINUTE;
-        displayText = minutesDifference + plural(" minute", minutesDifference);
+        secondsRemainder = (secondsDifference * ONE_MINUTE) - secondsDifference;
+        displayText = minutesDifference + plural(" minute", minutesDifference) + " and " +
+                      secondsRemainder + plural(" second", secondsDifference);
     }
     else if (secondsDifference < ONE_DAY)
     {
         hoursDifference = secondsDifference / ONE_HOUR;
-        displayText = hoursDifference + plural(" hour", hoursDifference);
+        secondsRemainder = secondsDifference - (secondsDifference * ONE_HOUR);
+        minutesDifference = secondsRemainder / ONE_MINUTE;
+        displayText = hoursDifference + plural(" hour", hoursDifference) + " and " +
+                      minutesDifference + plural(" minute", minutesDifference);
     }
     else
     {
@@ -202,6 +208,12 @@ void setDisplayText()
 
     Serial.print("Time since last incident: ");
     Serial.println(displayText);
+    // Serial.print("Seconds difference: ");
+    // Serial.println(secondsDifference);
+    // Serial.print("Timestamp: ");
+    // Serial.println(timestamp);
+    Serial.print("Last incident: ");
+    Serial.println(lastIncident);
 }
 
 /**
