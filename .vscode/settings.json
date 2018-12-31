@@ -4,6 +4,12 @@
         "PLATFORMIO_CALLER": "vscode"
     },
     "cSpell.words": [
-        "Adafruit"
+        "Adafruit",
+        "debounced",
+        "fi",
+        "println",
+        "ssid",
+        "wi",
+        "wifi"
     ]
 }
