@@ -188,7 +188,7 @@ void setDisplayText()
     else if (secondsDifference < ONE_HOUR)
     {
         minutesDifference = secondsDifference / ONE_MINUTE;
-        secondsRemainder = (secondsDifference * ONE_MINUTE) - secondsDifference;
+        secondsRemainder = secondsDifference - (minutesDifference * ONE_MINUTE);
         displayText = minutesDifference + plural(" minute", minutesDifference) + " and " +
                       secondsRemainder + plural(" second", secondsDifference);
     }
