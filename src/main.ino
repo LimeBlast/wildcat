@@ -97,7 +97,7 @@ void loop()
 
     setDisplayText();
 
-    for (int8_t x = 16; x >= getScrollWidth(); x--)
+    for (int16_t x = 16; x >= getScrollWidth(); x--)
     {
         if (button.getSingleDebouncedPress())
         {
@@ -106,6 +106,8 @@ void loop()
             x = 16; // resets the display loop
         }
 
+        // Serial.print("Scroll position: ");
+        // Serial.println(x);
         matrix.clear();
         matrix.setCursor(x, 0);
         matrix.print(displayText);
@@ -130,8 +132,8 @@ void handleIncident(AdafruitIO_Data *data)
 void updateTimestamp(char *data, uint16_t len)
 {
     timestamp = atol(data);
-    // Serial.print("Timestamp: ");
-    // Serial.println(timestamp);
+    Serial.print("Timestamp: ");
+    Serial.println(timestamp);
 }
 
 /**
@@ -226,5 +228,7 @@ int getScrollWidth()
     int16_t x1, y1;
     uint16_t w, h;
     matrix.getTextBounds(displayText, 0, 0, &x1, &y1, &w, &h);
+    // Serial.print("Scroll width: ");
+    // Serial.println(w - w - w);
     return w - w - w;
 }
